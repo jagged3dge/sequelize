@@ -110,6 +110,89 @@ describe(Support.getTestDialectTeaser('belongsToMany'), function() {
     });
   });
 
+  describe('pseudo associations', function () {
+    it('should setup belongsTo relations to source and target from join model with defined foreign/other keys', function () {
+      var Product = this.sequelize.define('Product', {
+          title: DataTypes.STRING
+        })
+      , Tag = this.sequelize.define('Tag', {
+          name: DataTypes.STRING
+        })
+      , ProductTag = this.sequelize.define('ProductTag', {
+          priority: DataTypes.INTEGER
+      });
+
+      Product.Tags = Product.belongsToMany(Tag, {through: ProductTag, foreignKey: 'productId', otherKey: 'tagId'});
+      Tag.Products = Tag.belongsToMany(Product, {through: ProductTag, foreignKey: 'tagId', otherKey: 'productId'});
+
+      expect(Product.Tags.toSource).to.be.ok;
+      expect(Product.Tags.toTarget).to.be.ok;
+
+      expect(Tag.Products.toSource).to.be.ok;
+      expect(Tag.Products.toTarget).to.be.ok;
+
+      expect(Product.Tags.toSource.foreignKey).to.equal(Product.Tags.foreignKey);
+      expect(Product.Tags.toTarget.foreignKey).to.equal(Product.Tags.otherKey);
+
+      expect(Tag.Products.toSource.foreignKey).to.equal(Tag.Products.foreignKey);
+      expect(Tag.Products.toTarget.foreignKey).to.equal(Tag.Products.otherKey);
+    });
+
+    it('should setup belongsTo relations to source and target from join model with only foreign keys defined', function () {
+      var Product = this.sequelize.define('Product', {
+          title: DataTypes.STRING
+        })
+      , Tag = this.sequelize.define('Tag', {
+          name: DataTypes.STRING
+        })
+      , ProductTag = this.sequelize.define('ProductTag', {
+          priority: DataTypes.INTEGER
+      });
+
+      Product.Tags = Product.belongsToMany(Tag, {through: ProductTag, foreignKey: 'product_ID'});
+      Tag.Products = Tag.belongsToMany(Product, {through: ProductTag, foreignKey: 'tag_ID'});
+
+      expect(Product.Tags.toSource).to.be.ok;
+      expect(Product.Tags.toTarget).to.be.ok;
+
+      expect(Tag.Products.toSource).to.be.ok;
+      expect(Tag.Products.toTarget).to.be.ok;
+
+      expect(Product.Tags.toSource.foreignKey).to.equal(Product.Tags.foreignKey);
+      expect(Product.Tags.toTarget.foreignKey).to.equal(Product.Tags.otherKey);
+
+      expect(Tag.Products.toSource.foreignKey).to.equal(Tag.Products.foreignKey);
+      expect(Tag.Products.toTarget.foreignKey).to.equal(Tag.Products.otherKey);
+    });
+
+    it('should setup belongsTo relations to source and target from join model with no foreign keys defined', function () {
+      var Product = this.sequelize.define('Product', {
+          title: DataTypes.STRING
+        })
+      , Tag = this.sequelize.define('Tag', {
+          name: DataTypes.STRING
+        })
+      , ProductTag = this.sequelize.define('ProductTag', {
+          priority: DataTypes.INTEGER
+      });
+
+      Product.Tags = Product.belongsToMany(Tag, {through: ProductTag});
+      Tag.Products = Tag.belongsToMany(Product, {through: ProductTag});
+
+      expect(Product.Tags.toSource).to.be.ok;
+      expect(Product.Tags.toTarget).to.be.ok;
+
+      expect(Tag.Products.toSource).to.be.ok;
+      expect(Tag.Products.toTarget).to.be.ok;
+
+      expect(Product.Tags.toSource.foreignKey).to.equal(Product.Tags.foreignKey);
+      expect(Product.Tags.toTarget.foreignKey).to.equal(Product.Tags.otherKey);
+
+      expect(Tag.Products.toSource.foreignKey).to.equal(Tag.Products.foreignKey);
+      expect(Tag.Products.toTarget.foreignKey).to.equal(Tag.Products.otherKey);
+    });
+  });
+
   describe('self-associations', function () {
     it('does not pair multiple self associations with different through arguments', function () {
       var User = current.define('user', {})
